@@ -4,7 +4,7 @@ const ObjectId = require('mongodb').ObjectId;
 const cors = require('cors');
 require("dotenv").config();
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 5000;
 
 
 app.use(cors());
@@ -25,6 +25,9 @@ async function run() {
         console.log('connected to DB');
         const database = client.db("tourGroup");
         const spotCollection = database.collection("services");
+        const orderCollection = database.collection('orders')
+
+
         //GET API
 
         app.get('/services', async (req, res) => {
@@ -49,7 +52,13 @@ async function run() {
             const result = await spotCollection.insertOne(service);
             console.log(result);
             res.json(result)
-        })
+        });
+
+        app.post('/orders'), async (req, res) => {
+            const order = req.body;
+            console.log('order', order);
+            res.send('Order processed')
+        }
 
 
         //DELETE API
