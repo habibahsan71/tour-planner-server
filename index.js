@@ -25,7 +25,7 @@ async function run() {
         console.log('connected to DB');
         const database = client.db("tourGroup");
         const spotCollection = database.collection("services");
-        const orderCollection = database.collection('orders')
+        const cart_Collection = database.collection('cart')
 
 
         //GET API
@@ -38,36 +38,69 @@ async function run() {
 
         app.get('/services/:id', async (req, res) => {
             const id = req.params.id;
-            console.log('getting specific id', id);
+            // console.log('getting specific id', id);
             const query = { _id: ObjectId(id) };
             const service = await spotCollection.findOne(query);
             res.json(service);
         })
 
+        // load cart data by id
+        app.get("/cart/:uid", async (req, res) => {
+            const uid = req.params.uid;
+            const query = { uid: uid };
+            const result = await cart_Collection.find(query).toArray();
+            res.json(result);
+        });
+
+        //GET Order APi
+        app.get('/orders', async (req, res) => {
+            const cursor = orderCollection.find({})
+            const order = await cursor.toArray()
+            res.send(order)
+        })
 
         //POST API
-        app.post('/services', async (req, res) => {
-            const service = req.body;
-            console.log('post hitted', service);
-            const result = await spotCollection.insertOne(service);
+
+        app.post('/orders', async (req, res) => {
+            console.log(req.body);
+            const order = req.body
+            const result = await orderCollection.insertOne(order)
             console.log(result);
+            res.send(result)
+        })
+
+        app.post('/service/add', async (req, res) => {
+            const service = req.body;
+            const result = await cart_Collection.insertOne(service);
+            console.log(result.insertedId);
             res.json(result)
         });
 
-        app.post('/orders'), async (req, res) => {
-            const order = req.body;
-            console.log('order', order);
-            res.send('Order processed')
-        }
+        // delete data from cart delete api
+        app.delete("/delete/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await cart_Collection.deleteOne(query);
+            console.log(result);
+            res.json(result);
+        });
 
 
-        //DELETE API
+
+        //DELETE APII
         app.delete('/services/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) }
             const result = await spotCollection.deleteOne(query);
             res.json(result)
         })
+
+        app.delete("/purchase/:uid", async (req, res) => {
+            const uid = req.params.uid;
+            const query = { uid: uid };
+            const result = await cart_Collection.deleteMany(query);
+            res.json(result);
+        });
 
     } finally {
         //   await client.close();
