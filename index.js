@@ -26,6 +26,7 @@ async function run() {
         const database = client.db("tourGroup");
         const spotCollection = database.collection("services");
         const cart_Collection = database.collection('cart')
+        const order_Collection = database.collection('order')
 
 
         //GET API
@@ -54,7 +55,7 @@ async function run() {
 
         //GET Order APi
         app.get('/orders', async (req, res) => {
-            const cursor = orderCollection.find({})
+            const cursor = order_Collection.find({})
             const order = await cursor.toArray()
             res.send(order)
         })
@@ -64,14 +65,14 @@ async function run() {
         app.post('/orders', async (req, res) => {
             console.log(req.body);
             const order = req.body
-            const result = await orderCollection.insertOne(order)
+            const result = await order_Collection.insertOne(order)
             console.log(result);
             res.send(result)
         })
 
-        app.post('/service/add', async (req, res) => {
+        app.post('/services', async (req, res) => {
             const service = req.body;
-            const result = await cart_Collection.insertOne(service);
+            const result = await spotCollection.insertOne(service);
             console.log(result.insertedId);
             res.json(result)
         });
@@ -95,12 +96,12 @@ async function run() {
             res.json(result)
         })
 
-        app.delete("/purchase/:uid", async (req, res) => {
-            const uid = req.params.uid;
-            const query = { uid: uid };
-            const result = await cart_Collection.deleteMany(query);
-            res.json(result);
-        });
+        // app.delete("/purchase/:uid", async (req, res) => {
+        //     const uid = req.params.uid;
+        //     const query = { uid: uid };
+        //     const result = await cart_Collection.deleteMany(query);
+        //     res.json(result);
+        // });
 
     } finally {
         //   await client.close();
